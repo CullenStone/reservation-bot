@@ -15,7 +15,8 @@ from logger import logging as log
 
 UNAME = os.getenv('RESY_USERNAME')
 PWORD = os.getenv('RESY_PASSWORD')
-EXPECTED_TIME = datetime.datetime(year=2024, month=1, day=27, hour=23, minute=46, second=0)
+EXPECTED_TIME = datetime.datetime(year=2024, month=1, day=28, hour=12, minute=0, second=0)
+RESERVE_BUFFER = 10
 WAIT_TIME_NOT_HEADLESS = 1.5
 WAIT_TIME_HEADLESS = 0.5
 # Open Webpage
@@ -42,7 +43,9 @@ def time_waiter(func):
     def inner(*args, **kwargs):
 
         # I want to wait until one minute before the expected time
-        wait_seconds = (EXPECTED_TIME - datetime.datetime.now()).total_seconds() - 10
+        wait_seconds = (EXPECTED_TIME - datetime.datetime.now()).total_seconds() - RESERVE_BUFFER
+        log.info(f"Trying to reserve time at: {EXPECTED_TIME}")
+        log.info(f"Will try to reserve +- {RESERVE_BUFFER} seconds from reservation date/time")
 
         # Check if program should wait
         if wait_seconds <= 0:
@@ -51,13 +54,16 @@ def time_waiter(func):
             log.info(f"Waiting {wait_seconds} seconds")
             time.sleep(wait_seconds)
 
-        while (datetime.datetime.now() - EXPECTED_TIME).total_seconds() < 10:
+        attempt_counter = 1
+        while (datetime.datetime.now() - EXPECTED_TIME).total_seconds() < RESERVE_BUFFER:
+            log.info(f"---Attempt: {attempt_counter}---")
             try:
                 func(*args, **kwargs)
             except Exception as e:
                 log.exception(f"Error: {e}, trying again")
                 time.sleep(.25)
             time.sleep(1)
+            attempt_counter += 1
     return inner
 
 
@@ -152,7 +158,7 @@ def main(driver):
     log.info('Opening browser')
 
     # Create URL (Tatiana reservation is 27 days away)
-    reservation_date = datetime.datetime.now() + datetime.timedelta(days=12)
+    reservation_date = datetime.datetime.now() + datetime.timedelta(days=27)
     adjusted_date = datetime.datetime(year=reservation_date.year, month=reservation_date.month, day=reservation_date.day, hour=12, minute=0, second=0)
     log.info(f'Trying to book reservation around {adjusted_date}')
     url = create_url(restaurant='tatiana', party_size=2, date=adjusted_date)
