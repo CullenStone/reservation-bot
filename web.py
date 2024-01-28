@@ -105,6 +105,7 @@ def reserve_time(driver, resy):
     
     time.sleep(1)
     # Click reserve
+    #TODO: Need to wait until this is available, it may be longer/shorter than 1 second. This is the point it got to.
     driver.find_element(By.XPATH, '//div[@class="SummaryPage__book"]').click()
     log.info(f'Reserved time at: {datetime.datetime.now()}')
     time.sleep(4)
