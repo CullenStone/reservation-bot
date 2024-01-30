@@ -3,4 +3,5 @@ py310/*
 **/__pycache__/**
 
 .env
+.docker_env
 

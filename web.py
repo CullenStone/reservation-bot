@@ -15,7 +15,7 @@ from logger import logging as log
 
 UNAME = os.getenv('RESY_USERNAME')
 PWORD = os.getenv('RESY_PASSWORD')
-EXPECTED_TIME = datetime.datetime(year=2024, month=1, day=28, hour=12, minute=0, second=0)
+EXPECTED_TIME = datetime.datetime(year=2024, month=1, day=29, hour=12, minute=0, second=0)
 RESERVE_BUFFER = 10
 WAIT_TIME_NOT_HEADLESS = 1.5
 WAIT_TIME_HEADLESS = 0.5
@@ -159,7 +159,7 @@ def main(driver):
     log.info('Opening browser')
 
     # Create URL (Tatiana reservation is 27 days away)
-    reservation_date = datetime.datetime.now() + datetime.timedelta(days=27)
+    reservation_date = datetime.datetime.now() + datetime.timedelta(days=28)
     adjusted_date = datetime.datetime(year=reservation_date.year, month=reservation_date.month, day=reservation_date.day, hour=12, minute=0, second=0)
     log.info(f'Trying to book reservation around {adjusted_date}')
     url = create_url(restaurant='tatiana', party_size=2, date=adjusted_date)
@@ -188,7 +188,8 @@ if __name__ == '__main__':
 
     if args.type == 'headless':
         options = webdriver.ChromeOptions()
-        options.add_argument("--headless=new")
+        options.add_argument("--headless")
+        options.add_argument('--no-sandbox')
         driver = webdriver.Chrome(options=options)
 
     else:
