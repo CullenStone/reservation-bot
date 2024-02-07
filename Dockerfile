@@ -14,4 +14,4 @@ RUN python -m pip install -r requirements.txt
 # COPY requirements.txt .
 
 # RUN pip install -r requirements.txt
-RUN python test.py
+CMD ["python", "web.py", "--type", "headless"]

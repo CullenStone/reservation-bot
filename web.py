@@ -15,8 +15,10 @@ from logger import logging as log
 
 UNAME = os.getenv('RESY_USERNAME')
 PWORD = os.getenv('RESY_PASSWORD')
-EXPECTED_TIME = datetime.datetime(year=2024, month=1, day=29, hour=12, minute=0, second=0)
-RESERVE_BUFFER = 10
+# Expected reservation time
+
+EXPECTED_TIME = datetime.datetime.strptime(os.getenv('EXPECTED_TIME'), '%Y-%m-%d %H:%M:%S')
+RESERVE_BUFFER = 15
 WAIT_TIME_NOT_HEADLESS = 1.5
 WAIT_TIME_HEADLESS = 0.5
 # Open Webpage
@@ -126,7 +128,7 @@ def reserve_time(driver, resy):
 def check_availability(driver, url):
     driver.get(url)
     log.info(f"Getting url: {datetime.datetime.now()}")
-    time.sleep(0.5) # This can be .5 for headless, 1.5 for safari
+    time.sleep(.5) # This can be .5 for headless, 1.5 for safari
 
     slots = driver.find_element(By.XPATH, '//div[@class="ReservationButtonList ShiftInventory__shift__slots"]')
     log.info('Got reservation element')
@@ -159,9 +161,9 @@ def main(driver):
     log.info('Opening browser')
 
     # Create URL (Tatiana reservation is 27 days away)
-    reservation_date = datetime.datetime.now() + datetime.timedelta(days=28)
+    reservation_date = datetime.datetime.now() + datetime.timedelta(days=27)
     adjusted_date = datetime.datetime(year=reservation_date.year, month=reservation_date.month, day=reservation_date.day, hour=12, minute=0, second=0)
-    log.info(f'Trying to book reservation around {adjusted_date}')
+    log.info(f'Trying to book reservation for {adjusted_date}')
     url = create_url(restaurant='tatiana', party_size=2, date=adjusted_date)
     #url = create_url(restaurant='cervos', party_size=2, date=adjusted_date)
     log.info(f'Created url: {url}')
@@ -191,10 +193,12 @@ if __name__ == '__main__':
         options.add_argument("--headless")
         options.add_argument('--no-sandbox')
         driver = webdriver.Chrome(options=options)
+        
 
     else:
         driver = webdriver.Safari(port=0, executable_path="/usr/bin/safaridriver", quiet=False)
 
+    driver.implicitly_wait(4)
     driver.maximize_window()
 
     main(driver)
